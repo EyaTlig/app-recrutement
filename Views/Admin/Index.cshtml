@@ -1,0 +1,97 @@
+@model recrutementapp.ViewModels.AdminDashboardViewModel
+@{ ViewData["Title"] = "Admin Dashboard"; }
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+      <div><div class="stat-value">@Model.TotalUsers</div><div class="stat-label">Total Users</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-briefcase"></i></div>
+      <div><div class="stat-value">@Model.ActiveJobs</div><div class="stat-label">Active Jobs</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="bi bi-file-earmark-text"></i></div>
+      <div><div class="stat-value">@Model.TotalApplications</div><div class="stat-label">Applications</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="bi bi-building"></i></div>
+      <div><div class="stat-value">@Model.TotalCompanies</div><div class="stat-label">Companies</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Secondary stats row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card-tf p-3 d-flex align-items-center gap-3" style="border-left:4px solid #f59e0b">
+      <i class="bi bi-hourglass-split fs-3 text-warning"></i>
+      <div>
+        <div class="fw-bold fs-4">@Model.PendingApplications</div>
+        <div class="text-muted small">Applications pending review</div>
+      </div>
+      <a asp-action="Applications" class="btn btn-sm btn-outline-warning ms-auto">Review</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card-tf p-3 d-flex align-items-center gap-3" style="border-left:4px solid #2563eb">
+      <i class="bi bi-briefcase fs-3 text-primary"></i>
+      <div>
+        <div class="fw-bold fs-4">@Model.TotalJobs</div>
+        <div class="text-muted small">Total job offers in system</div>
+      </div>
+      <a asp-action="JobOffers" class="btn btn-sm btn-outline-primary ms-auto">View</a>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Applications table -->
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-clock-history me-2 text-primary"></i>Recent Applications</span>
+    <a asp-action="Applications" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  @if (!Model.RecentApplications.Any())
+  {
+    <div class="card-tf-body text-center text-muted py-4">
+      <i class="bi bi-inbox fs-2 d-block mb-2"></i>No applications yet.
+    </div>
+  }
+  else
+  {
+    <div class="table-responsive">
+      <table class="table-tf">
+        <thead>
+          <tr><th>Candidate</th><th>Position</th><th>Company</th><th>Status</th><th>Match</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          @foreach (var a in Model.RecentApplications)
+          {
+            <tr>
+              <td>
+                <div class="fw-semibold small">@a.CandidateName</div>
+                <div class="text-muted" style="font-size:.75rem">@a.CandidateEmail</div>
+              </td>
+              <td class="small">@a.JobTitle</td>
+              <td class="small text-muted">@a.CompanyName</td>
+              <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+              <td>
+                @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                <span class="match-badge @mc">@a.MatchScore%</span>
+              </td>
+              <td class="text-muted small">@a.AppliedAt.ToString("MMM dd, yyyy")</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

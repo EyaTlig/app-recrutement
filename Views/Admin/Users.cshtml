@@ -1,0 +1,59 @@
+@model List<recrutementapp.Models.User>
+@{ ViewData["Title"] = "Manage Users"; }
+
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-people me-2 text-primary"></i>All Users (@Model.Count)</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table-tf">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Registered</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        @foreach (var u in Model)
+        {
+          <tr>
+            <td class="fw-semibold">@u.Name</td>
+            <td class="text-muted small">@u.Email</td>
+            <td>
+              <span class="badge @(u.Role == "Admin" ? "bg-danger" : u.Role == "Recruiter" ? "bg-primary" : "bg-secondary")">
+                @u.Role
+              </span>
+            </td>
+            <td>
+              @if (u.IsActive)
+              {
+                <span class="status-badge status-Active"><i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Active</span>
+              }
+              else
+              {
+                <span class="status-badge status-Rejected"><i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Inactive</span>
+              }
+            </td>
+            <td class="text-muted small">@u.CreatedAt.ToString("MMM dd, yyyy")</td>
+            <td>
+              @if (u.Role != "Admin")
+              {
+                <form asp-action="ToggleUser" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@u.Id" />
+                  <button type="submit"
+                          class="btn btn-sm @(u.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                          onclick="return confirm('@(u.IsActive ? "Deactivate" : "Activate") this user?')">
+                    <i class="bi bi-@(u.IsActive ? "pause" : "play")-fill me-1"></i>
+                    @(u.IsActive ? "Deactivate" : "Activate")
+                  </button>
+                </form>
+              }
+              else
+              {
+                <span class="text-muted small">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

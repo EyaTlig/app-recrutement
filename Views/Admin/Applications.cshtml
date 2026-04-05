@@ -1,0 +1,54 @@
+@model List<recrutementapp.ViewModels.ApplicationListItemViewModel>
+@{ ViewData["Title"] = "All Applications"; }
+
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-file-earmark-text me-2 text-primary"></i>All Applications (@Model.Count)</span>
+  </div>
+
+  @if (!Model.Any())
+  {
+    <div class="card-tf-body text-center py-5 text-muted">
+      <i class="bi bi-inbox" style="font-size:3rem;color:#d1d5db"></i>
+      <p class="mt-3">No applications in the system yet.</p>
+    </div>
+  }
+  else
+  {
+    <div class="table-responsive">
+      <table class="table-tf">
+        <thead>
+          <tr><th>Candidate</th><th>Position</th><th>Company</th><th>Status</th><th>Match</th><th>Applied</th><th>Resume</th></tr>
+        </thead>
+        <tbody>
+          @foreach (var a in Model)
+          {
+            <tr>
+              <td>
+                <div class="fw-semibold small">@a.CandidateName</div>
+                <div class="text-muted" style="font-size:.75rem">@a.CandidateEmail</div>
+              </td>
+              <td class="small">@a.JobTitle</td>
+              <td class="text-muted small">@a.CompanyName</td>
+              <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+              <td>
+                @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                <span class="match-badge @mc"><i class="bi bi-lightning-fill"></i>@a.MatchScore%</span>
+              </td>
+              <td class="text-muted small">@a.AppliedAt.ToString("MMM dd, yyyy")</td>
+              <td>
+                @if (!string.IsNullOrEmpty(a.ResumePath))
+                {
+                  <a href="/@a.ResumePath" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                }
+                else { <span class="text-muted">—</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
