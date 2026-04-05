@@ -1,0 +1,45 @@
+@model List<recrutementapp.Models.JobOffer>
+@{ ViewData["Title"] = "All Job Offers"; }
+
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-briefcase me-2 text-primary"></i>All Job Offers (@Model.Count)</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table-tf">
+      <thead>
+        <tr><th>Title</th><th>Company</th><th>Type</th><th>Applicants</th><th>Status</th><th>Posted</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        @foreach (var j in Model)
+        {
+          <tr>
+            <td class="fw-semibold">@j.Title</td>
+            <td class="text-muted small">@(j.Company?.Name ?? "—")</td>
+            <td><span class="job-tag">@j.ContractType</span></td>
+            <td class="fw-semibold">@j.Applications.Count</td>
+            <td><span class="status-badge status-@j.Status">@j.Status</span></td>
+            <td class="text-muted small">@j.CreatedAt.ToString("MMM dd, yyyy")</td>
+            <td>
+              @if (j.Status == "Active")
+              {
+                <form asp-action="DeleteJob" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@j.Id" />
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Close this job offer?')">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                  </button>
+                </form>
+              }
+              else
+              {
+                <span class="text-muted small">Closed</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
