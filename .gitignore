@@ -1,0 +1,22 @@
+## Fichiers Visual Studio
+.vs/
+.vs/config/
+.vs/*.suo
+.vs/*.user
+.vs/ProjectEvaluation/
+
+## Dossiers de build
+bin/
+obj/
+packages/
+
+## Fichiers utilisateur
+*.user
+*.suo
+*.userprefs
+
+## Fichiers de configuration locaux
+appsettings.Development.json
+
+## Logs
+*.log
