@@ -1,0 +1,38 @@
+@{
+    var ctrl   = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString()     ?? "";
+    string A(string c, string a = "Index") => (ctrl == c && action == a) ? "active" : "";
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <span class="nav-label">Administration</span>
+    <a class="sidebar-link @A("Admin")"         asp-controller="Admin"     asp-action="Index">       <i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="sidebar-link @A("Admin","Users")" asp-controller="Admin"     asp-action="Users">       <i class="bi bi-people"></i> Users</a>
+    <a class="sidebar-link @A("Admin","Companies")" asp-controller="Admin" asp-action="Companies">   <i class="bi bi-building"></i> Companies</a>
+    <a class="sidebar-link @A("Admin","JobOffers")" asp-controller="Admin" asp-action="JobOffers">   <i class="bi bi-briefcase"></i> Job Offers</a>
+    <a class="sidebar-link @A("Admin","Applications")" asp-controller="Admin" asp-action="Applications"><i class="bi bi-file-earmark-text"></i> Applications</a>
+    <span class="nav-label mt-2">Browse</span>
+    <a class="sidebar-link @A("Job")"           asp-controller="Job"       asp-action="Index">       <i class="bi bi-search"></i> All Jobs</a>
+}
+else if (User.IsInRole("Recruiter"))
+{
+    <span class="nav-label">Recruiter</span>
+    <a class="sidebar-link @A("Recruiter")"              asp-controller="Recruiter" asp-action="Index">        <i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="sidebar-link @A("Job","Create")"           asp-controller="Job"       asp-action="Create">       <i class="bi bi-plus-circle"></i> Post a Job</a>
+    <a class="sidebar-link @A("Recruiter","JobOffers")"  asp-controller="Recruiter" asp-action="JobOffers">    <i class="bi bi-briefcase"></i> My Jobs</a>
+    <a class="sidebar-link @A("Recruiter","Applications")" asp-controller="Recruiter" asp-action="Applications"><i class="bi bi-file-earmark-text"></i> Applications</a>
+    <span class="nav-label mt-2">Browse</span>
+    <a class="sidebar-link @A("Job")"                   asp-controller="Job"       asp-action="Index">        <i class="bi bi-search"></i> All Jobs</a>
+}
+else
+{
+    <span class="nav-label">Candidate</span>
+    <a class="sidebar-link @A("Candidate","Dashboard")"  asp-controller="Candidate" asp-action="Dashboard">    <i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a class="sidebar-link @A("Job")"                   asp-controller="Job"       asp-action="Index">        <i class="bi bi-search"></i> Browse Jobs</a>
+    <a class="sidebar-link @A("Candidate","Applications")" asp-controller="Candidate" asp-action="Applications"><i class="bi bi-file-earmark-text"></i> My Applications</a>
+    <a class="sidebar-link @A("Candidate","Profile")"    asp-controller="Candidate" asp-action="Profile">      <i class="bi bi-person-badge"></i> My Profile</a>
+}
+
+<span class="nav-label mt-2">General</span>
+<a class="sidebar-link @A("Home")" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i> Home</a>
