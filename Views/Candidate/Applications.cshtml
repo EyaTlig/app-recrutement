@@ -1,0 +1,70 @@
+@model List<recrutementapp.ViewModels.ApplicationListItemViewModel>
+@{ ViewData["Title"] = "My Applications"; }
+
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-file-earmark-text me-2 text-primary"></i>My Applications</span>
+    <a asp-controller="Job" asp-action="Index" class="btn btn-sm btn-brand">
+      <i class="bi bi-search me-1"></i>Find Jobs
+    </a>
+  </div>
+
+  @if (!Model.Any())
+  {
+    <div class="card-tf-body text-center py-5 text-muted">
+      <i class="bi bi-inbox" style="font-size:3rem;color:#d1d5db"></i>
+      <p class="mt-3 fw-semibold">No applications yet</p>
+      <a asp-controller="Job" asp-action="Index" class="btn btn-brand mt-1">Browse Jobs</a>
+    </div>
+  }
+  else
+  {
+    <div class="table-responsive">
+      <table class="table-tf">
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Status</th>
+            <th>Match</th>
+            <th>Applied</th>
+            <th>Interview</th>
+            <th>Resume</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var a in Model)
+          {
+            <tr>
+              <td>
+                <div class="fw-semibold">@a.JobTitle</div>
+                <div class="text-muted small">@a.CompanyName</div>
+              </td>
+              <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+              <td>
+                @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                <span class="match-badge @mc"><i class="bi bi-lightning-fill"></i>@a.MatchScore%</span>
+              </td>
+              <td class="text-muted small">@a.AppliedAt.ToString("MMM dd, yyyy")</td>
+              <td>
+                @if (a.Status == "InterviewScheduled" && a.InterviewId.HasValue)
+                {
+                  <span class="status-badge status-InterviewScheduled"><i class="bi bi-camera-video me-1"></i>Scheduled</span>
+                }
+                else { <span class="text-muted small">—</span> }
+              </td>
+              <td>
+                @if (!string.IsNullOrEmpty(a.ResumePath))
+                {
+                  <a href="/@a.ResumePath" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                }
+                else { <span class="text-muted small">—</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,100 @@
+@model recrutementapp.ViewModels.DashboardViewModel
+@{ ViewData["Title"] = "My Dashboard"; }
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-file-earmark-text"></i></div>
+      <div><div class="stat-value">@Model.TotalApplications</div><div class="stat-label">Total Applications</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="bi bi-hourglass-split"></i></div>
+      <div><div class="stat-value">@Model.PendingApplications</div><div class="stat-label">Pending</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+      <div><div class="stat-value">@Model.AcceptedApplications</div><div class="stat-label">Accepted</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="bi bi-camera-video"></i></div>
+      <div><div class="stat-value">@Model.InterviewsScheduled</div><div class="stat-label">Interviews</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Applications -->
+  <div class="col-lg-7">
+    <div class="card-tf">
+      <div class="card-tf-header">
+        Recent Applications
+        <a asp-action="Applications" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      @if (!Model.RecentApplications.Any())
+      {
+        <div class="card-tf-body text-center text-muted py-4">
+          <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+          You haven't applied to any jobs yet.
+          <div class="mt-2"><a asp-controller="Job" asp-action="Index" class="btn btn-sm btn-brand">Browse Jobs</a></div>
+        </div>
+      }
+      else
+      {
+        <div class="table-responsive">
+          <table class="table-tf">
+            <thead><tr><th>Job</th><th>Status</th><th>Match</th><th>Date</th></tr></thead>
+            <tbody>
+              @foreach (var a in Model.RecentApplications)
+              {
+                <tr>
+                  <td>
+                    <div class="fw-semibold small">@a.JobTitle</div>
+                    <div class="text-muted" style="font-size:.78rem">@a.CompanyName</div>
+                  </td>
+                  <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+                  <td>
+                    @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                    <span class="match-badge @mc">@a.MatchScore%</span>
+                  </td>
+                  <td class="text-muted small">@a.AppliedAt.ToString("MMM dd")</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Recommended Jobs -->
+  <div class="col-lg-5">
+    <div class="card-tf">
+      <div class="card-tf-header">
+        Jobs For You
+        <a asp-controller="Job" asp-action="Index" class="btn btn-sm btn-outline-primary">All Jobs</a>
+      </div>
+      <div class="card-tf-body d-flex flex-column gap-3">
+        @foreach (var job in Model.RecommendedJobs)
+        {
+          <div class="d-flex align-items-center gap-3 pb-3 border-bottom">
+            <div class="company-logo-placeholder" style="width:36px;height:36px;font-size:.75rem;border-radius:8px;flex-shrink:0">
+              @(job.CompanyName.Length >= 2 ? job.CompanyName[..2].ToUpper() : "?")
+            </div>
+            <div class="flex-grow-1" style="min-width:0">
+              <a asp-controller="Job" asp-action="Details" asp-route-id="@job.Id" class="job-title small d-block text-truncate">@job.Title</a>
+              <span class="text-muted" style="font-size:.75rem">@job.CompanyName · @job.Location</span>
+            </div>
+            <a asp-controller="Job" asp-action="Apply" asp-route-id="@job.Id" class="btn btn-sm btn-outline-primary flex-shrink-0">Apply</a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
