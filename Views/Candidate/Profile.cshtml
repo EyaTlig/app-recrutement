@@ -1,0 +1,132 @@
+@model recrutementapp.ViewModels.CandidateProfileViewModel
+@{ ViewData["Title"] = "My Profile"; }
+
+<div class="row g-4">
+  <!-- Profile form -->
+  <div class="col-lg-7">
+    <div class="card-tf mb-4">
+      <div class="card-tf-header"><i class="bi bi-person-badge me-2 text-primary"></i>Profile Information</div>
+      <div class="card-tf-body">
+        <form asp-action="Profile" method="post">
+          @Html.AntiForgeryToken()
+          <input asp-for="UserId" type="hidden" />
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label asp-for="UserName" class="form-label">Full Name</label>
+              <input asp-for="UserName" class="form-control" />
+              <span asp-validation-for="UserName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="text" class="form-control bg-light" value="@Model.UserEmail" readonly />
+            </div>
+            <div class="col-12">
+              <label asp-for="Headline" class="form-label">Professional Headline</label>
+              <input asp-for="Headline" class="form-control" placeholder="e.g. Full-Stack .NET Developer" />
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Location" class="form-label">Location</label>
+              <input asp-for="Location" class="form-control" placeholder="e.g. Tunis, Tunisia" />
+            </div>
+            <div class="col-md-6">
+              <label asp-for="ExperienceYears" class="form-label">Years of Experience</label>
+              <input asp-for="ExperienceYears" type="number" min="0" max="50" class="form-control" />
+            </div>
+            <div class="col-12">
+              <label asp-for="Summary" class="form-label">Professional Summary</label>
+              <textarea asp-for="Summary" class="form-control" rows="4"
+                        placeholder="Brief description of your background and goals…"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="LinkedInUrl" class="form-label">LinkedIn URL</label>
+              <input asp-for="LinkedInUrl" class="form-control" placeholder="https://linkedin.com/in/…" />
+            </div>
+            <div class="col-md-6">
+              <label asp-for="GitHubUrl" class="form-label">GitHub URL</label>
+              <input asp-for="GitHubUrl" class="form-control" placeholder="https://github.com/…" />
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-brand px-4 fw-semibold">
+              <i class="bi bi-save me-2"></i>Save Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills panel -->
+  <div class="col-lg-5">
+    <div class="card-tf mb-3">
+      <div class="card-tf-header"><i class="bi bi-lightning me-2 text-primary"></i>My Skills</div>
+      <div class="card-tf-body">
+        @if (Model.Skills.Any())
+        {
+          <div class="d-flex flex-column gap-3 mb-4">
+            @foreach (var sk in Model.Skills)
+            {
+              <div class="d-flex align-items-center gap-3">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="small fw-semibold">@sk.SkillName</span>
+                    <span class="text-muted small">@sk.ProficiencyLevel/5</span>
+                  </div>
+                  <div class="proficiency-bar">
+                    <div class="fill" style="width:@(sk.ProficiencyLevel * 20)%"></div>
+                  </div>
+                </div>
+                <form asp-action="RemoveSkill" method="post" class="flex-shrink-0">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="skillId" value="@sk.SkillId" />
+                  <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-1" title="Remove">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </form>
+              </div>
+            }
+          </div>
+        }
+        else
+        {
+          <p class="text-muted small mb-4">No skills added yet. Add skills to improve your match score!</p>
+        }
+
+        <!-- Add skill form -->
+        <form asp-action="AddSkill" method="post">
+          @Html.AntiForgeryToken()
+          <div class="row g-2 align-items-end">
+            <div class="col-6">
+              <label class="form-label small">Skill</label>
+              <select name="skillId" class="form-select form-select-sm">
+                @foreach (var sk in (IEnumerable<recrutementapp.Models.Skill>)ViewBag.AllSkills)
+                {
+                  <option value="@sk.Id">@sk.Name (@sk.Category)</option>
+                }
+              </select>
+            </div>
+            <div class="col-3">
+              <label class="form-label small">Level</label>
+              <select name="proficiency" class="form-select form-select-sm">
+                <option value="1">1 — Beginner</option>
+                <option value="2">2 — Basic</option>
+                <option value="3" selected>3 — Intermediate</option>
+                <option value="4">4 — Advanced</option>
+                <option value="5">5 — Expert</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <button type="submit" class="btn btn-sm btn-brand w-100">
+                <i class="bi bi-plus"></i> Add
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }
