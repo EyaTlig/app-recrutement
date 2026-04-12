@@ -1,0 +1,150 @@
+@model IEnumerable<recrutementapp.ViewModels.JobListItemViewModel>
+@{ ViewData["Title"] = "Browse Jobs"; }
+
+<!-- Search bar -->
+<form method="get" class="card-tf card-tf-body mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label small mb-1">Keyword</label>
+      <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="search" class="form-control" value="@ViewBag.Search" placeholder="Job title, company…" />
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Location</label>
+      <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-geo-alt text-muted"></i></span>
+        <input type="text" name="location" class="form-control" value="@ViewBag.Location" placeholder="City…" />
+      </div>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Contract</label>
+      <select name="contractType" class="form-select">
+        <option value="">All Types</option>
+        <option value="FullTime"   selected="@(ViewBag.ContractType == "FullTime"   ? "selected" : null)">Full Time</option>
+        <option value="PartTime"   selected="@(ViewBag.ContractType == "PartTime"   ? "selected" : null)">Part Time</option>
+        <option value="Freelance"  selected="@(ViewBag.ContractType == "Freelance"  ? "selected" : null)">Freelance</option>
+        <option value="Internship" selected="@(ViewBag.ContractType == "Internship" ? "selected" : null)">Internship</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-brand w-100">Search</button>
+    </div>
+  </div>
+</form>
+
+<!-- Results header -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <span class="text-muted small">@Model.Count() job(s) found</span>
+  @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()) || !string.IsNullOrEmpty(ViewBag.Location?.ToString()))
+  {
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x me-1"></i>Clear Filters</a>
+  }
+</div>
+
+@if (!Model.Any())
+{
+  <div class="text-center py-5 card-tf">
+    <i class="bi bi-search" style="font-size:3rem;color:#d1d5db"></i>
+    <p class="mt-3 text-muted fw-semibold">No jobs found</p>
+    <p class="text-muted small">Try different keywords or clear the filters.</p>
+  </div>
+}
+else
+{
+  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 mb-4">
+    @foreach (var job in Model)
+    {
+      <div class="col">
+        <div class="job-card">
+          <!-- Header -->
+          <div class="d-flex align-items-start gap-3">
+            <div class="company-logo-placeholder">
+              @(job.CompanyName.Length >= 2 ? job.CompanyName[..2].ToUpper() : job.CompanyName.ToUpper())
+            </div>
+            <div class="flex-grow-1" style="min-width:0">
+              <a asp-action="Details" asp-route-id="@job.Id" class="job-title d-block text-truncate">@job.Title</a>
+              <span class="job-company">@job.CompanyName</span>
+            </div>
+            @if (job.MatchScore.HasValue)
+            {
+              var cls = job.MatchScore >= 70 ? "match-high" : job.MatchScore >= 40 ? "match-medium" : "match-low";
+              <span class="match-badge @cls flex-shrink-0"><i class="bi bi-lightning-fill"></i>@job.MatchScore%</span>
+            }
+          </div>
+
+          <!-- Tags -->
+          <div class="job-meta">
+            <span class="job-tag"><i class="bi bi-geo-alt"></i>@(job.IsRemote ? "Remote" : job.Location)</span>
+            <span class="job-tag"><i class="bi bi-clock"></i>@job.ContractType</span>
+            @if (job.SalaryMin.HasValue)
+            {
+              <span class="job-tag"><i class="bi bi-cash"></i>@job.SalaryMin?.ToString("N0")@(job.SalaryMax.HasValue ? "–" + job.SalaryMax?.ToString("N0") : "+") TND</span>
+            }
+          </div>
+
+          <!-- Skills pills -->
+          @if (job.RequiredSkills.Any())
+          {
+            <div class="d-flex flex-wrap gap-1">
+              @foreach (var s in job.RequiredSkills.Take(4))
+              {
+                <span class="badge" style="background:#eff6ff;color:#1d4ed8;font-weight:500;font-size:.72rem">@s</span>
+              }
+              @if (job.RequiredSkills.Count > 4)
+              {
+                <span class="badge bg-light text-muted">+@(job.RequiredSkills.Count - 4)</span>
+              }
+            </div>
+          }
+
+          <!-- Footer -->
+          <div class="d-flex align-items-center justify-content-between border-top pt-2 mt-auto">
+            <span class="text-muted" style="font-size:.75rem">
+              <i class="bi bi-clock me-1"></i>@((DateTime.UtcNow - job.CreatedAt).Days)d ago
+              · @job.ApplicationCount applied
+            </span>
+            @if (job.HasApplied)
+            {
+              <span class="status-badge status-Accepted"><i class="bi bi-check-circle"></i>Applied</span>
+            }
+            else
+            {
+              <a asp-action="Apply" asp-route-id="@job.Id" class="btn btn-sm btn-brand">Apply</a>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if ((int)ViewBag.TotalPages > 1)
+  {
+    int cur   = ViewBag.CurrentPage;
+    int total = ViewBag.TotalPages;
+    <nav class="d-flex justify-content-center">
+      <ul class="pagination">
+        <li class="page-item @(cur == 1 ? "disabled" : "")">
+          <a class="page-link" asp-action="Index" asp-route-page="@(cur-1)"
+             asp-route-search="@ViewBag.Search" asp-route-location="@ViewBag.Location"
+             asp-route-contractType="@ViewBag.ContractType"><i class="bi bi-chevron-left"></i></a>
+        </li>
+        @for (int i = Math.Max(1, cur - 2); i <= Math.Min(total, cur + 2); i++)
+        {
+          <li class="page-item @(i == cur ? "active" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@i"
+               asp-route-search="@ViewBag.Search" asp-route-location="@ViewBag.Location"
+               asp-route-contractType="@ViewBag.ContractType">@i</a>
+          </li>
+        }
+        <li class="page-item @(cur == total ? "disabled" : "")">
+          <a class="page-link" asp-action="Index" asp-route-page="@(cur+1)"
+             asp-route-search="@ViewBag.Search" asp-route-location="@ViewBag.Location"
+             asp-route-contractType="@ViewBag.ContractType"><i class="bi bi-chevron-right"></i></a>
+        </li>
+      </ul>
+    </nav>
+  }
+}
