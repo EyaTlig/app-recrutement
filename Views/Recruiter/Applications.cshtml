@@ -1,0 +1,59 @@
+@model List<recrutementapp.ViewModels.ApplicationListItemViewModel>
+@{ ViewData["Title"] = "Applications"; }
+
+<div class="card-tf">
+  <div class="card-tf-header">
+    <span><i class="bi bi-file-earmark-text me-2 text-primary"></i>All Applications</span>
+    <span class="text-muted small">@Model.Count total</span>
+  </div>
+
+  @if (!Model.Any())
+  {
+    <div class="card-tf-body text-center py-5 text-muted">
+      <i class="bi bi-inbox" style="font-size:3rem;color:#d1d5db"></i>
+      <p class="mt-3">No applications received yet.</p>
+    </div>
+  }
+  else
+  {
+    <div class="table-responsive">
+      <table class="table-tf">
+        <thead>
+          <tr><th>Candidate</th><th>Position</th><th>Status</th><th>Match</th><th>Applied</th><th>Resume</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          @foreach (var a in Model)
+          {
+            <tr>
+              <td>
+                <div class="fw-semibold">@a.CandidateName</div>
+                <div class="text-muted small">@a.CandidateEmail</div>
+              </td>
+              <td class="small">@a.JobTitle</td>
+              <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+              <td>
+                @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                <span class="match-badge @mc"><i class="bi bi-lightning-fill"></i>@a.MatchScore%</span>
+              </td>
+              <td class="text-muted small">@a.AppliedAt.ToString("MMM dd, yyyy")</td>
+              <td>
+                @if (!string.IsNullOrEmpty(a.ResumePath))
+                {
+                  <a href="/@a.ResumePath" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                }
+                else { <span class="text-muted">—</span> }
+              </td>
+              <td>
+                <a asp-action="ApplicationDetail" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye me-1"></i>Review
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

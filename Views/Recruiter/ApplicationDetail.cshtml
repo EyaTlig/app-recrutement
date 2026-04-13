@@ -1,0 +1,136 @@
+@model recrutementapp.ViewModels.ApplicationDetailViewModel
+@{ ViewData["Title"] = "Application Detail"; }
+
+<div class="row g-4">
+  <!-- Left: candidate info -->
+  <div class="col-lg-8">
+    <div class="card-tf mb-4">
+      <div class="card-tf-header">
+        <span><i class="bi bi-person-badge me-2 text-primary"></i>Candidate Information</span>
+        <span class="status-badge status-@Model.Status">@Model.Status</span>
+      </div>
+      <div class="card-tf-body">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="text-muted small mb-1">Full Name</div>
+            <div class="fw-semibold">@Model.CandidateName</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small mb-1">Email</div>
+            <div><a href="mailto:@Model.CandidateEmail">@Model.CandidateEmail</a></div>
+          </div>
+          @if (!string.IsNullOrEmpty(Model.CandidateHeadline))
+          {
+            <div class="col-12">
+              <div class="text-muted small mb-1">Headline</div>
+              <div>@Model.CandidateHeadline</div>
+            </div>
+          }
+          <div class="col-md-6">
+            <div class="text-muted small mb-1">Applied For</div>
+            <div class="fw-semibold">@Model.JobTitle</div>
+            <div class="text-muted small">@Model.CompanyName</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small mb-1">Applied On</div>
+            <div>@Model.AppliedAt.ToString("MMMM dd, yyyy HH:mm")</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small mb-1">Match Score</div>
+            @{ var mc = Model.MatchScore >= 70 ? "match-high" : Model.MatchScore >= 40 ? "match-medium" : "match-low"; }
+            <span class="match-badge @mc fs-6"><i class="bi bi-lightning-fill"></i>@Model.MatchScore%</span>
+          </div>
+          @if (!string.IsNullOrEmpty(Model.ResumePath))
+          {
+            <div class="col-md-6">
+              <div class="text-muted small mb-1">Resume</div>
+              <a href="/@Model.ResumePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-file-earmark-pdf me-1"></i>View Resume
+              </a>
+            </div>
+          }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.CoverLetter))
+        {
+          <div class="border-top pt-3">
+            <div class="text-muted small mb-2 fw-semibold">Cover Letter</div>
+            <div class="text-muted lh-lg" style="font-size:.9rem;white-space:pre-wrap">@Model.CoverLetter</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Interview info -->
+    @if (Model.InterviewScheduledAt.HasValue)
+    {
+      <div class="card-tf mb-4" style="border-left:4px solid #7c3aed">
+        <div class="card-tf-body">
+          <h6 class="fw-bold mb-3"><i class="bi bi-camera-video me-2 text-purple" style="color:#7c3aed"></i>Interview Scheduled</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="text-muted small mb-1">Date &amp; Time</div>
+              <div class="fw-semibold">@Model.InterviewScheduledAt.Value.ToString("dddd, MMMM dd yyyy")</div>
+              <div class="text-muted small">@Model.InterviewScheduledAt.Value.ToString("HH:mm")</div>
+            </div>
+            <div class="col-md-6">
+              <div class="text-muted small mb-1">Meeting Link</div>
+              <a href="@Model.InterviewMeetingLink" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-camera-video me-1"></i>Join Meeting
+              </a>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.InterviewNotes))
+            {
+              <div class="col-12">
+                <div class="text-muted small mb-1">Notes</div>
+                <div class="small">@Model.InterviewNotes</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Right: actions -->
+  <div class="col-lg-4">
+    <!-- Update Status -->
+    <div class="card-tf mb-3">
+      <div class="card-tf-header"><i class="bi bi-arrow-repeat me-2"></i>Update Status</div>
+      <div class="card-tf-body d-flex flex-column gap-2">
+        @foreach (var status in new[] { "Reviewed", "Shortlisted", "Accepted", "Rejected" })
+        {
+          <form asp-action="UpdateStatus" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="status" value="@status" />
+            <button type="submit"
+                    class="btn w-100 text-start @(Model.Status == status ? "btn-primary" : "btn-outline-secondary")"
+                    style="font-size:.875rem">
+              <span class="status-badge status-@status me-2">@status</span>
+              @(Model.Status == status ? "✓ Current" : "Set as " + status)
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+
+    <!-- Schedule Interview -->
+    <div class="card-tf mb-3">
+      <div class="card-tf-header"><i class="bi bi-calendar-plus me-2 text-purple" style="color:#7c3aed"></i>Interview</div>
+      <div class="card-tf-body">
+        <p class="text-muted small mb-3">
+          @(Model.InterviewScheduledAt.HasValue ? "Reschedule or update the interview." : "Schedule a video interview with this candidate.")
+        </p>
+        <a asp-action="ScheduleInterview" asp-route-id="@Model.Id" class="btn btn-outline-primary w-100">
+          <i class="bi bi-camera-video me-2"></i>
+          @(Model.InterviewScheduledAt.HasValue ? "Reschedule Interview" : "Schedule Interview")
+        </a>
+      </div>
+    </div>
+
+    <a asp-action="Applications" class="btn btn-outline-secondary w-100">
+      <i class="bi bi-arrow-left me-1"></i>Back to Applications
+    </a>
+  </div>
+</div>
