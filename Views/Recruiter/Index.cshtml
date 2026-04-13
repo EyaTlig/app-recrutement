@@ -1,0 +1,105 @@
+@model recrutementapp.ViewModels.RecruiterDashboardViewModel
+@{ ViewData["Title"] = "Recruiter Dashboard"; }
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-briefcase"></i></div>
+      <div><div class="stat-value">@Model.TotalJobOffers</div><div class="stat-label">Job Offers</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="bi bi-file-earmark-text"></i></div>
+      <div><div class="stat-value">@Model.TotalApplications</div><div class="stat-label">Applications</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="bi bi-hourglass-split"></i></div>
+      <div><div class="stat-value">@Model.PendingApplications</div><div class="stat-label">Pending Review</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-camera-video"></i></div>
+      <div><div class="stat-value">@Model.InterviewsScheduled</div><div class="stat-label">Interviews</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Applications -->
+  <div class="col-lg-8">
+    <div class="card-tf">
+      <div class="card-tf-header">
+        Recent Applications
+        <a asp-action="Applications" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      @if (!Model.RecentApplications.Any())
+      {
+        <div class="card-tf-body text-center text-muted py-4">
+          <i class="bi bi-inbox fs-2 d-block mb-2"></i>No applications yet.
+        </div>
+      }
+      else
+      {
+        <div class="table-responsive">
+          <table class="table-tf">
+            <thead><tr><th>Candidate</th><th>Position</th><th>Status</th><th>Match</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+              @foreach (var a in Model.RecentApplications)
+              {
+                <tr>
+                  <td>
+                    <div class="fw-semibold small">@a.CandidateName</div>
+                    <div class="text-muted" style="font-size:.75rem">@a.CandidateEmail</div>
+                  </td>
+                  <td class="small">@a.JobTitle</td>
+                  <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+                  <td>
+                    @{ var mc = a.MatchScore >= 70 ? "match-high" : a.MatchScore >= 40 ? "match-medium" : "match-low"; }
+                    <span class="match-badge @mc">@a.MatchScore%</span>
+                  </td>
+                  <td class="text-muted small">@a.AppliedAt.ToString("MMM dd")</td>
+                  <td>
+                    <a asp-action="ApplicationDetail" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Review</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- My Jobs -->
+  <div class="col-lg-4">
+    <div class="card-tf">
+      <div class="card-tf-header">
+        My Job Offers
+        <a asp-controller="Job" asp-action="Create" class="btn btn-sm btn-brand">
+          <i class="bi bi-plus"></i> Post
+        </a>
+      </div>
+      <div class="card-tf-body d-flex flex-column gap-3">
+        @if (!Model.MyJobs.Any())
+        {
+          <p class="text-muted small text-center py-2">No jobs posted yet.</p>
+        }
+        @foreach (var j in Model.MyJobs)
+        {
+          <div class="d-flex align-items-center justify-content-between border-bottom pb-3">
+            <div style="min-width:0">
+              <div class="fw-semibold small text-truncate">@j.Title</div>
+              <div class="text-muted" style="font-size:.75rem">@j.ApplicationCount applicants · @j.ContractType</div>
+            </div>
+            <a asp-action="Applications" class="btn btn-sm btn-outline-secondary flex-shrink-0 ms-2">View</a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
